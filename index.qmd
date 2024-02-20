@@ -1,0 +1,127 @@
+---
+title: "Machine Learning"
+format: 
+  revealjs:
+    smaller: true
+    scrollable: true
+    theme: [default, custom.scss]
+editor: visual
+---
+
+# Key topics:
+
+-   K-nearest neighbors
+
+-   Kernel Smoothers (Local Constant Regression)
+
+-   Local Linear Regression
+
+-   Polynomial Regression
+
+**Before we start:**\
+\
+Our focus is on regression task where the goal is to estimate ${E[Y|X]}$ and the relationship between Y and X is: ${y_i = g(x_i) + \epsilon_i}$.
+
+## K - Nearest Neighbors
+
+\
+Given a set of data points ${(x_i, y_i), 1<=i<=n}$, and a new point ${(P_x, P_y)}$ we can use KNN to estimate ${P_y}$ using the following steps:\
+
+1.  Calculate the distance between ${P_x}$ and every ${x_i}$.
+2.  Sort the distances
+3.  Get the K nearest neighbors ${y_i}$ coordinate and average them.
+
+**In a more general way:**
+
+-   We calculate the distance between the new X and the predictors from our data.
+-   find the K nearest neighbors of X.
+-   get the response variable values corresponding to these neighbors and average them.
+
+**Averaging part - ZOOM IN:**\
+\
+After finding the K nearest neighbors we get the response variable values and average them.\
+\
+So an estimator for ${g(x)}$ will be: $\hat{g(x)} = {\frac{1}{k}\Sigma_{i=1}^ky_i}$
+
+## Kernel Smoothers
+
+\
+**Assumption:** weight observations ${y_i}$ depend on closeness to x (We can think of x as a center of a circle or window).
+
+Before diving into how to use the Kernel Smoother to predict new data point we first need to understand what is a kernel function.
+
+Kernel function (denoted as ${K(u)}$) is a mathematical function that assigns weights to observations based on their distance or proximity to a point.\
+\
+**Commonly used kernel functions:**\
+
+-   Gaussian Kernel: ${K(u) = \frac{1}{\sqrt{2\pi}}exp(-\frac{u^2}{2})}$
+-   Epanechnikov Kernel: ${K(u) = \frac{3}{4}(1-u^2), for~|u|<=1,~otherwise~0}$
+-   Uniform Kernel: ${K(u) = 1/2, for~|u|<=1,~otherwise~0}$
+
+**Using Kernel Smoothers we can estimate** ${g(x)}$ using the following steps:
+
+1.  Calculate the weights: ${w_i = \frac{K(\frac{x_i - x}{h})}{\Sigma_{i=1}^n K(\frac{x_i - x}{h})}}$
+2.  Multiply each ${y_i}$ by it's weight (${\Sigma_{i=1}^n y_i * w_i}$)
+
+**Note:** ${\Sigma_{i=1}^n w_i = 1}$ , ${\hat{g(x)} = {\Sigma_{i=1}^n y_i * w_i}}$
+
+Also note that the choice of kernel is not so important (The choice of h is more important).
+
+## Local Linear Regression
+
+\
+Non-parametric regression technique used for estimating relationship. Unlike traditional linear regression, where a single and global line fits the entire data here we fit separate linear models to different subsets of data.\
+\
+So, at each point x where the estimate is desired we use a weighted least squares model where the weights are calculated using a kernel function.\
+\
+**Using LLR we can estimate** ${\hat{g(x)}}$ using the following steps:\
+
+1.  Calculate the weights using: ${K(\frac{x_i - x}{h})}$
+2.  Create a diagonal weight matrix (${W}$) using: ${I_n * {\sqrt{K(\frac{x_i - x}{h})}}} ~ where~n = size(data)$
+3.  Estimate the coeff vector ${\beta}$ using: ${(X'WX)^{-1}(X'WY)}$
+4.  Fit a local linear to estimate ${g(x)}$ using ${X(X'WX)^{-1}(X'WY)}$.
+
+**Note:** an estimator for ${g(x)}$ will be: ${\hat{g(x)} = X(X'WX)^{-1}(X'WY)}$
+
+## Polynomial Regression
+
+\
+
+A type of regression analysis used to model the relationship between a dependent variable and one or more independent variables. Unlike linear regression which assumes a linear relationship between the dependent and independent variables, Polynomial regression allows for nonlinear relationships to be captured.\
+
+**The general form of polynomial regression:** ${y = \beta_0 + \beta_1x + ... + \beta_nx^n + \epsilon}$\
+
+\*\*Using Polynomial Regression we can estimate ${g(X)}$ using the following steps:
+
+1.  Estimate the coeff vector ${\beta}$ using: ${(X'X)^{-1}(X'Y)}$ (same as linear regression).
+2.  Fit a polynomial curve to estimate ${g(x)}$ using ${X(X'X)^{-1}(X'Y)}$
+
+**Note:** an estimator for ${g(x)}$ will be: ${\hat{g(x)} = {X(X'X)^{-1}(X'Y)}}$
+
+## Cross-Validation
+
+\
+
+**For each fold:**\
+
+1.  separate the data into train and test.
+2.  Fit the model on train data
+3.  Predict using the test data
+4.  Calculate error
+
+At the end, we calculate the average error across all folds.\
+\
+
+We can use cross validation to choose the right parameter for our model (h, K, poly degree etc.).
+
+So, for each parameter we can run the cross validation algorithm and choose the parameter which gives us the minimal error.
+
+# Good to know numpy functions:
+
+-   np.mean
+-   np.power
+-   np.random
+-   np.linalg.norm
+-   np.linalg.inv
+-   np.matmul
+-   np.dot
